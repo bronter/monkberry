@@ -85,6 +85,7 @@ AttributeText [^\"{]+
 <expr>"//".*($|\r\n|\r|\n)         /* skip comments */
 <expr>{StringLiteral}              return "STRING_LITERAL";
 <expr>"import"                     return "IMPORT";
+<expr>"extends"                    return "EXTENDS";
 <expr>"from"                       return "FROM";
 <expr>"if"                         return "IF";
 <expr>"else"                       return "ELSE";
@@ -250,6 +251,7 @@ EmptyTag
 Statement
     : ExpressionStatement
     | ImportStatement
+    | ExtendsStatement
     | IfStatement
     | ForStatement
     | UnsafeStatement
@@ -271,6 +273,12 @@ ImportStatement
        }
     ;
 
+ExtendsStatement
+    : "{%" EXTENDS IdentifierName "%}"
+       {
+           $$ = new ExtendsStatementNode($3, createSourceLocation(@1, @3));
+       }
+    ;
 
 IfStatement
     :  "{%" IF Expression "%}" ElementList "{%" ENDIF "%}"

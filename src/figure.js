@@ -10,6 +10,7 @@ export class Figure {
     this.children = [];
     this.functions = {};
     this.imports = [];
+    this.extends = null;
     this.declarations = [];
     this.constructions = [];
     this.directives = [];
@@ -131,11 +132,20 @@ export class Figure {
 
     sn.add(`}\n`);
 
-    sn.add([
-      `${this.name}.prototype = Object.create(Monkberry.prototype);\n`,
-      `${this.name}.prototype.constructor = ${this.name};\n`,
-      `${this.name}.pool = [];\n`
-    ]);
+    if (this.extends == null) {
+      sn.add([
+        `${this.name}.prototype = Object.create(Monkberry.prototype);\n`,
+        `${this.name}.prototype.constructor = ${this.name};\n`
+      ]);
+    } else {
+      sn.add([
+        `${this.name}.prototype = Object.create(${this.extends}.prototype);\n`,
+        `${this.name}.prototype.constructor = ${this.extends};\n`
+      ]);
+    }
+
+    sn.add(`${this.name}.pool = [];\n`)
+
 
     sn.add(this.generateUpdateFunction());
 
@@ -311,6 +321,10 @@ export class Figure {
 
   addImport(source) {
     this.imports.push(source);
+  }
+
+  setExtends(identifier) {
+    this.extends = identifier;
   }
 
   addOnUpdate(node) {

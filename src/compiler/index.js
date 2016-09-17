@@ -7,6 +7,7 @@ import expression from './expression';
 import text from './text';
 import comment from './comment';
 import import_ from './import';
+import extends_ from "./extends";
 import if_ from './if';
 import for_ from './for';
 import unsafe from './unsafe';
@@ -20,6 +21,7 @@ const compilers = Object.assign({},
   text,
   comment,
   import_,
+  extends_,
   if_,
   for_,
   unsafe

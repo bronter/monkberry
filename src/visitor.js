@@ -66,6 +66,9 @@ const visitors = {
   ImportStatement: (node, visitor) => {
     handle(node, visitor);
   },
+  ExtendsStatement: (node, visitor) => {
+    handle(node, visitor);
+  },
   IfStatement: (node, visitor) => {
     handle(node, visitor);
 
