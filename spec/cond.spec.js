@@ -17,6 +17,19 @@ describe('If tags', function () {
     view.update({test: true});
     expect(view).toBeLike('<div>true: parent data</div>');
 
+    var view = Monkberry.render(CondElseIf, root);
+    view.update({test: true, test2: false});
+    expect(view).toBeLike('<div> if </div>');
+
+    view.update({test: false, test2: true});
+    expect(view).toBeLike('<div> elseif </div>');
+
+    view.update({test: false, test2: false});
+    expect(view).toBeLike('<div> else </div>');
+
+    view.update({test: true, test2: true});
+    expect(view).toBeLike('<div> if </div>');
+
     view = Monkberry.render(CondElse, root);
     view.update({test: true});
     expect(view).toBeLike('<div> then </div>');

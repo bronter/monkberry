@@ -65,6 +65,20 @@ function IfStatementNode(cond, then, otherwise, loc) {
   this.loc = loc;
 }
 
+function ElseIfStatementNode(cond, then, otherwise, loc) {
+  this.type = "ElseIfStatement";
+  this.cond = cond;
+  this.then = then;
+  this.otherwise = otherwise;
+  this.loc = loc;
+}
+
+function ElseStatementNode(then, loc) {
+  this.type = "ElseStatement";
+  this.then = then;
+  this.loc = loc;
+}
+
 function ForStatementNode(expr, body, options, loc) {
   this.type = "ForStatement";
   this.expr = expr;
@@ -208,6 +222,8 @@ ast.DirectiveNode = DirectiveNode;
 ast.ExpressionStatementNode = ExpressionStatementNode;
 ast.ImportStatementNode = ImportStatementNode;
 ast.IfStatementNode = IfStatementNode;
+ast.ElseIfStatementNode = ElseIfStatementNode;
+ast.ElseStatementNode = ElseStatementNode;
 ast.ForStatementNode = ForStatementNode;
 ast.UnsafeStatementNode = UnsafeStatementNode;
 ast.FilterExpressionNode = FilterExpressionNode;

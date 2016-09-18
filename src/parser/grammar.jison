@@ -88,6 +88,7 @@ AttributeText [^\"{]+
 <expr>"from"                       return "FROM";
 <expr>"if"                         return "IF";
 <expr>"else"                       return "ELSE";
+<expr>"elseif"                     return "ELSEIF";
 <expr>"endif"                      return "ENDIF";
 <expr>"for"                        return "FOR";
 <expr>"endfor"                     return "ENDFOR";
@@ -277,9 +278,35 @@ IfStatement
         {
             $$ = new IfStatementNode($3, $5, null, createSourceLocation(@1, @8));
         }
-    |  "{%" IF Expression "%}" ElementList "{%" ELSE "%}" ElementList "{%" ENDIF "%}"
+    |  "{%" IF Expression "%}" ElementList ElseStatement
         {
-            $$ = new IfStatementNode($3, $5, $9, createSourceLocation(@1, @12));
+            $$ = new IfStatementNode($3, $5, $6, createSourceLocation(@1, @6));
+        }
+    |  "{%" IF Expression "%}" ElementList ElseIfStatement
+        {
+            $$ = new IfStatementNode($3, $5, $6, createSourceLocation(@1, @6));
+        }
+    ;
+
+ElseIfStatement
+    :  "{%" ELSEIF Expression "%}" ElementList "{%" ENDIF "%}"
+        {
+            $$ = new ElseIfStatementNode($3, $5, null, createSourceLocation(@1, @7));
+        }
+    |  "{%" ELSEIF Expression "%}" ElementList ElseStatement
+        {
+            $$ = new ElseIfStatementNode($3, $5, $6, createSourceLocation(@1, @6));
+        }
+    |  "{%" ELSEIF Expression "%}" ElementList ElseIfStatement
+        {
+            $$ = new ElseIfStatementNode($3, $5, $6, createSourceLocation(@1, @6));
+        }
+    ;
+
+ElseStatement
+    :  "{%" ELSE "%}" ElementList "{%" ENDIF "%}"
+        {
+            $$ = new ElseStatementNode($4, createSourceLocation(@1, @7));
         }
     ;
 

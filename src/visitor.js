@@ -76,9 +76,27 @@ const visitors = {
     }
 
     if (node.otherwise) {
-      for (let i = 0; i < node.otherwise.length; i++) {
-        visit(node.otherwise[i], visitor);
-      }
+      visit(node.otherwise, visitor);
+    }
+  },
+  ElseIfStatement: (node, visitor) => {
+    handle(node, visitor);
+
+    visit(node.cond, visitor);
+
+    for (let i = 0; i < node.then.length; i++) {
+      visit(node.then[i], visitor);
+    }
+
+    if (node.otherwise) {
+      visit(node.otherwise, visitor);
+    }
+  },
+  ElseStatement: (node, visitor) => {
+    handle(node, visitor);
+
+    for (let i = 0; i < node.then.length; i++) {
+      visit(node.then[i], visitor);
     }
   },
   ForStatement: (node, visitor) => {

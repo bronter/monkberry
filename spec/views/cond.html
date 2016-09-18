@@ -3,6 +3,17 @@
         {% if test %}true: {{ context }}{% endif %}
     </div>
 </CondIf>
+<CondElseIf>
+    <div>
+        {% if test %}
+            then
+        {% elseif test2 %}
+            elseif
+        {% else %}
+            else
+        {% endif %}
+    </div>
+</CondElseIf>
 <CondElse>
     <div>
         {% if test %}

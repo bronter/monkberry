@@ -3,80 +3,73 @@ import { Figure } from '../figure';
 import { collectVariables } from './variable';
 import { isSingleChild, notNull } from '../utils';
 
-export default {
-  IfStatement: ({parent, node, figure, compile}) => {
-    node.reference = null;
+function _IfStatement({parent, node, figure, compile}) {
+  node.reference = null;
 
-    let templateNameForThen = figure.name + '_if' + figure.uniqid('template_name');
-    let templateNameForOtherwise = figure.name + '_else' + figure.uniqid('template_name');
-    let childNameForThen = 'child' + figure.uniqid('child_name');
-    let childNameForOtherwise = 'child' + figure.uniqid('child_name');
-    let placeholder;
+  const type = node.type.split("Statement")[0].toLowerCase();
 
-    if (isSingleChild(parent, node)) {
-      placeholder = parent.reference;
-    } else {
-      node.reference = placeholder = 'for' + figure.uniqid('placeholder');
-      figure.declare(sourceNode(`var ${placeholder} = document.createComment('if');`));
-    }
+  let templateName = `${figure.name}_${type}` + figure.uniqid('template_name');
+  let childName = 'child' + figure.uniqid('child_name');
+  let placeholder;
+
+  if (isSingleChild(parent, node)) {
+    placeholder = parent.reference;
+  } else {
+    node.reference = placeholder = 'for' + figure.uniqid('placeholder');
+    figure.declare(sourceNode(`var ${placeholder} = document.createComment('${type}');`));
+  }
 
 
-    figure.declare(`var ${childNameForThen} = {};`);
+  figure.declare(`var ${childName} = {};`);
 
-    if (node.otherwise) {
-      figure.declare(`var ${childNameForOtherwise} = {};`);
-    }
+  var variablesOfExpression = collectVariables(figure.getScope(), node.cond);
 
-    // if (
+  figure.thisRef = true;
+  figure.hasNested = true;
 
-    var variablesOfExpression = collectVariables(figure.getScope(), node.cond);
+  const tests = {
+    "if": compile(node.cond),
+    "elseif": `!result && ${compile(node.cond)}`,
+    "else": "!result",
+  };
 
-    figure.thisRef = true;
-    figure.hasNested = true;
-    
-    figure.spot(variablesOfExpression).add(
-      sourceNode(node.loc, [
-        `      `,
-        node.otherwise ? `result = ` : ``,
-        `Monkberry.cond(_this, ${placeholder}, ${childNameForThen}, ${templateNameForThen}, `, compile(node.cond), `)`
+  const spot = figure.spot(variablesOfExpression).add(
+    sourceNode(node.loc, [
+      `      `,
+      node.otherwise ? `result = ` : ``,
+      `Monkberry.cond(_this, ${placeholder}, ${childName}, ${templateName}, `, tests[type], `)`
+    ])
+  );
+
+  if (type === "else") {
+    spot.declareVariable("result");
+  }
+
+  let compileBody = (loc, body, _templateName, childName) => {
+    let subfigure = new Figure(_templateName, figure);
+    subfigure.children = body.map(node => compile(node, subfigure)).filter(notNull);
+    figure.addFigure(subfigure);
+
+    figure.addOnUpdate(
+      sourceNode(loc, [
+        `    if (${childName}.ref) {\n`,
+        `      ${childName}.ref.update(__data__);\n`,
+        `    }`
       ])
     );
+  };
 
-    if (node.otherwise) {
-      figure.spot(variablesOfExpression).add(
-        sourceNode(node.loc, [
-          `      `,
-          `Monkberry.cond(_this, ${placeholder}, ${childNameForOtherwise}, ${templateNameForOtherwise}, !result)`
-        ])
-      ).declareVariable('result');
-    }
+  compileBody(node.loc, node.then, templateName, childName);
 
-    // ) then {
-
-    let compileBody = (loc, body, templateName, childName) => {
-      let subfigure = new Figure(templateName, figure);
-      subfigure.children = body.map(node => compile(node, subfigure)).filter(notNull);
-      figure.addFigure(subfigure);
-
-      figure.addOnUpdate(
-        sourceNode(loc, [
-          `    if (${childName}.ref) {\n`,
-          `      ${childName}.ref.update(__data__);\n`,
-          `    }`
-        ])
-      );
-    };
-
-    compileBody(node.loc, node.then, templateNameForThen, childNameForThen);
-
-    // } else {
-
-    if (node.otherwise) {
-      compileBody(node.loc, node.otherwise, templateNameForOtherwise, childNameForOtherwise);
-    }
-
-    // }
-
-    return node.reference;
+  if (node.otherwise) {
+    compile(node.otherwise, figure);
   }
+
+  return node.reference;
+}
+
+export default {
+  IfStatement: _IfStatement,
+  ElseIfStatement: _IfStatement,
+  ElseStatement: _IfStatement,
 };
