@@ -278,6 +278,10 @@ ExtendsStatement
        {
            $$ = new ExtendsStatementNode($3, createSourceLocation(@1, @3));
        }
+    | "{%" EXTENDS StringLiteral "%}"
+       {
+           $$ = new ExtendsStatementNode($3, createSourceLocation(@1, @3));
+       }
     ;
 
 IfStatement

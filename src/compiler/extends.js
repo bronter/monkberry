@@ -5,8 +5,19 @@ export default {
    * @return {null}
    */
   ExtendsStatement: ({node, figure}) => {
-    // TODO: Add support for ES2015 imports.
-    figure.root().setExtends(node.identifier.name);
+    const root = figure.root();
+    const nodeId = node.identifier;
+
+    if (nodeId.type === "Identifier") {
+      root.setExtends(nodeId.name);
+    } else {
+      const id = `${figure.name}_extends${figure.uniqid("extends_name")}`;
+      root.addImport(
+        sourceNode(node.loc, `var ${id} = __requireDefault(require(${nodeId.value}));`)
+      );
+
+      root.setExtends(id);
+    }
 
     return null;
   }
